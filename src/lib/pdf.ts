@@ -10,13 +10,30 @@ export async function downloadInvoicePdf(el: HTMLElement, filename: string) {
     backgroundColor: "#ffffff",
     logging: false,
     onclone: (clonedDocument, clonedElement) => {
+      const colorCanvas = clonedDocument.createElement("canvas");
+      const colorContext = colorCanvas.getContext("2d");
+      const toSrgb = (color: string) => {
+        if (!colorContext) return "#000000";
+        colorContext.fillStyle = "#000000";
+        colorContext.fillStyle = color;
+        const normalized = colorContext.fillStyle;
+        return typeof normalized === "string" ? normalized : "#000000";
+      };
       const normalizeColors = (element: HTMLElement) => {
         const styles = clonedDocument.defaultView?.getComputedStyle(element);
-        if (styles?.borderColor.includes("oklch")) {
-          element.style.borderColor = "#d9e8e1";
+        if (!styles) return;
+
+        const declarations: { property: string; value: string }[] = [];
+        for (let index = 0; index < styles.length; index++) {
+          const property = styles.item(index);
+          const value = styles.getPropertyValue(property);
+          if (/oklch\(/i.test(value)) declarations.push({ property, value });
         }
-        if (styles?.outlineColor.includes("oklch")) {
-          element.style.outlineColor = "transparent";
+        for (const { property, value } of declarations) {
+          element.style.setProperty(
+            property,
+            value.replace(/oklch\([^)]*\)/gi, (color) => toSrgb(color))
+          );
         }
       };
       normalizeColors(clonedElement);
