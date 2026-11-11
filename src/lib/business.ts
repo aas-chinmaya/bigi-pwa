@@ -13,10 +13,19 @@ export type Business = {
   invoice_prefix?: string;
   default_notes?: string | null;
   logo_data?: string | null;
+  pendingSync?: boolean;
 };
 
 /** Load business online from Supabase or offline from Dexie. Never throws. */
 export async function loadBusiness(userId: string): Promise<Business | null> {
+  let cached: Business | null = null;
+  try {
+    cached = (await getCache(userId, "business")) as Business | null;
+  } catch {
+    // Continue to the online profile when the local cache is unavailable.
+  }
+  if (cached?.pendingSync) return cached;
+
   try {
     if (typeof navigator !== "undefined" && navigator.onLine) {
       const supabase = createClient();
@@ -31,14 +40,17 @@ export async function loadBusiness(userId: string): Promise<Business | null> {
       }
     }
   } catch {
-    /* fall through to cache */
+    // Fall through to the cached profile.
   }
-  try {
-    const cached = await getCache(userId, "business");
-    return (cached as Business) || null;
-  } catch {
-    return null;
+  return cached;
+}
+
+export async function syncPendingBusiness(userId: string) {
+  const cached = (await getCache(userId, "business")) as Business | undefined;
+  if (cached?.pendingSync && typeof navigator !== "undefined" && navigator.onLine) {
+    return saveBusiness(userId, cached);
   }
+  return loadBusiness(userId);
 }
 
 export async function saveBusiness(userId: string, body: Partial<Business>) {
@@ -56,8 +68,8 @@ export async function saveBusiness(userId: string, body: Partial<Business>) {
   };
 
   if (typeof navigator !== "undefined" && !navigator.onLine) {
-    // offline: only cache locally (sync later if needed)
-    const local = { id: "local", ...payload } as Business;
+    // Keep local edits pending until the next successful online save.
+    const local = { id: "local", ...payload, pendingSync: true } as Business;
     await setCache(userId, "business", local);
     return local;
   }

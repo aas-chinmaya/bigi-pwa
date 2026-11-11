@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
-import { loadBusiness } from "@/lib/business";
+import { loadBusiness, syncPendingBusiness } from "@/lib/business";
 import type { Business } from "@/lib/business";
 import { getCurrentUser } from "@/lib/supabase/client";
 
@@ -13,14 +14,21 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    void (async () => {
+    const restoreIdentity = async () => {
       try {
         const user = await getCurrentUser();
         if (!user) {
           router.replace("/login");
           return;
         }
-        const business = await loadBusiness(user.id);
+        let business: Business | null;
+        try {
+          business = await syncPendingBusiness(user.id);
+        } catch (error) {
+          console.error("Could not sync the saved business profile", error);
+          business = await loadBusiness(user.id);
+          toast.error("Business changes are saved on this device but could not sync.");
+        }
         if (active) {
           setIdentity({ business, email: user.email ?? "" });
         }
@@ -28,8 +36,16 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
         console.error("Could not restore the saved session", error);
         router.replace("/login");
       }
-    })();
-    return () => { active = false; };
+    };
+
+    window.addEventListener("if:business-updated", restoreIdentity);
+    window.addEventListener("online", restoreIdentity);
+    void restoreIdentity();
+    return () => {
+      active = false;
+      window.removeEventListener("if:business-updated", restoreIdentity);
+      window.removeEventListener("online", restoreIdentity);
+    };
   }, [router]);
 
   if (!identity) {

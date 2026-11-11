@@ -81,6 +81,7 @@ export default function BusinessPage() {
       const user = await getCurrentUser();
       if (!user) throw new Error("Not signed in");
       await saveBusiness(user.id, form);
+      window.dispatchEvent(new Event("if:business-updated"));
       toast.success("Business profile saved");
       router.replace("/invoices");
       router.refresh();
@@ -95,7 +96,7 @@ export default function BusinessPage() {
     <div className="mx-auto max-w-lg space-y-4">
       <h1 className="text-2xl font-bold">Business profile</h1>
       <p className="text-sm text-muted-foreground">
-        Required once. Used on every invoice and PDF. Works offline after first save online.
+        Used on every invoice and PDF. Changes are saved on this device offline and sync when you reconnect.
       </p>
       <Card className="p-5">
         <form onSubmit={onSubmit} className="space-y-3">

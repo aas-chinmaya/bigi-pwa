@@ -78,7 +78,7 @@ The browser only sees variables that start with `NEXT_PUBLIC_`.
 | Create invoice | Supabase | Saved on this device → syncs when reconnected |
 | Edit / Delete | Supabase | Queued offline invoices can be edited; deleting synced invoices needs online |
 | PDF | From loaded detail | Available for queued invoices; open saved invoices online |
-| Business profile | Supabase + cache | Cache after one online save |
+| Business profile | Supabase + cache | Cached locally; offline changes sync when online |
 
 Sign in and open the app online at least once before working offline. The saved browser session, business profile, invoice list, and app pages are then available on that device. Keep the app installed or revisit its pages while online so the service worker can cache the app shell and required files. Unsynced invoices are preserved if you try to log out; reconnect and sync them first.
 
