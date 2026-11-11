@@ -75,10 +75,18 @@ export function AppShell({
       <header className="sticky top-0 z-40 border-b bg-card/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/85">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link href="/invoices" className="flex shrink-0 items-center gap-2.5 font-bold tracking-tight text-foreground">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-violet-500 text-white shadow-md shadow-primary/20">
-              <FileText className="h-[18px] w-[18px]" />
-            </span>
-            <span className="text-[15px]">Invoice<span className="text-primary">Flow</span></span>
+            {business?.logo_data ? (
+              <img
+                src={business.logo_data}
+                alt=""
+                className="h-9 w-9 rounded-xl border bg-white object-contain p-1 shadow-sm"
+              />
+            ) : (
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-violet-500 text-white shadow-md shadow-primary/20">
+                <FileText className="h-[18px] w-[18px]" />
+              </span>
+            )}
+            <span className="text-[15px]">Biginex</span>
           </Link>
           <nav className="ml-3 hidden h-full items-center gap-1 sm:flex">
             <Link
@@ -110,9 +118,17 @@ export function AppShell({
               <Dialog.Trigger
                 render={
                   <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-full p-0" aria-label="Open profile">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-primary/15">
-                      {initials || <UserRound className="h-4 w-4" />}
-                    </span>
+                    {business?.logo_data ? (
+                      <img
+                        src={business.logo_data}
+                        alt=""
+                        className="h-9 w-9 rounded-full bg-white object-contain p-0.5 ring-1 ring-primary/15"
+                      />
+                    ) : (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary ring-1 ring-primary/15">
+                        {initials || <UserRound className="h-4 w-4" />}
+                      </span>
+                    )}
                   </Button>
                 }
               />
@@ -122,9 +138,17 @@ export function AppShell({
                   <div className="bg-gradient-to-br from-primary/10 via-background to-violet-500/10 p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-lg font-semibold text-primary-foreground shadow-md">
-                          {initials}
-                        </span>
+                        {business?.logo_data ? (
+                          <img
+                            src={business.logo_data}
+                            alt=""
+                            className="h-12 w-12 shrink-0 rounded-2xl bg-white object-contain p-1 shadow-md"
+                          />
+                        ) : (
+                          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-lg font-semibold text-primary-foreground shadow-md">
+                            {initials}
+                          </span>
+                        )}
                         <div className="min-w-0">
                           <Dialog.Title className="truncate text-lg font-semibold">{displayName}</Dialog.Title>
                           <Dialog.Description className="truncate text-sm text-muted-foreground">

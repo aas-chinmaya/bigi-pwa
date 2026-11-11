@@ -1,4 +1,4 @@
-# InvoiceFlow — Step 0 setup (online + offline)
+# Biginex — setup (online + offline)
 
 ## A. Create a NEW Supabase project
 
@@ -25,8 +25,8 @@ Do **not** put service_role, JWT secret, or database password in the frontend / 
 ## B. Local run
 
 ```bash
-unzip invoiceflow.zip
-cd invoiceflow
+unzip biginex.zip
+cd biginex
 cp .env.example .env.local
 # paste URL + anon key into .env.local
 
@@ -40,7 +40,7 @@ Open http://localhost:3000
 
 ## C. Vercel
 
-1. Import the `invoiceflow` folder as a project  
+1. Import the `biginex` folder as a project  
 2. **Settings → Environment Variables** add:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
@@ -63,6 +63,7 @@ The browser only sees variables that start with `NEXT_PUBLIC_`.
 1. **Register** (name + business name + state + email + password)  
 2. If you already registered before schema was applied:  
    - Open **Business** in the top nav → fill form → Save  
+   - To add the business logo column to an existing database, run `alter table public.businesses add column if not exists logo_data text;` in the Supabase SQL Editor
 3. **New invoice** → select a previous customer or add one, then choose a saved item or enter a custom item → Save draft / Issue  
 4. Open invoice → **Download PDF** or **Print**  
 5. **Edit** / **Delete** from detail page  

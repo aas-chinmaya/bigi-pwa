@@ -1,11 +1,11 @@
-const V = "invoiceflow-v3";
+const V = "biginex-v1";
 const STATIC = V + "-static";
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(STATIC).then((c) => c.addAll(["/manifest.webmanifest", "/offline.html"])).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(
-    ks.filter((k) => k.startsWith("invoiceflow-v") && k !== STATIC).map((k) => caches.delete(k))
+    ks.filter((k) => (k.startsWith("invoiceflow-v") || k.startsWith("biginex-v")) && k !== STATIC).map((k) => caches.delete(k))
   )).then(() => self.clients.claim()));
 });
 self.addEventListener("message", (e) => {

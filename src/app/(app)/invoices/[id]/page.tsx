@@ -55,6 +55,7 @@ export default function InvoiceDetailPage() {
           notes: payload.notes,
           business: {
             name: business?.business_name || "Business",
+            logo_data: business?.logo_data || "",
             address: business?.address || "",
             email: business?.email || "",
             phone: business?.phone || "",
@@ -102,6 +103,7 @@ export default function InvoiceDetailPage() {
         notes: inv.notes,
         business: {
           name: biz?.business_name || "Business",
+          logo_data: biz?.logo_data || "",
           address: biz?.address || "",
           email: biz?.email || "",
           phone: biz?.phone || "",

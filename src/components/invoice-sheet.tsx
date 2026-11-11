@@ -15,6 +15,7 @@ export type SheetData = {
   notes?: string | null;
   business: {
     name: string;
+    logo_data?: string | null;
     address?: string;
     email?: string;
     phone?: string;
@@ -71,12 +72,21 @@ export const InvoiceSheet = forwardRef<HTMLDivElement, { data: SheetData }>(
         className="mx-auto shadow-md print:shadow-none"
       >
         <div style={{ display: "flex", justifyContent: "space-between", borderBottom: `2px solid ${brandColor}`, paddingBottom: 12 }}>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: brandColor }}>{data.business.name}</div>
-            <div style={{ whiteSpace: "pre-line", color: mutedColor }}>{data.business.address}</div>
-            <div style={{ color: mutedColor }}>{[data.business.phone, data.business.email].filter(Boolean).join(" · ")}</div>
-            {data.business.gstin && <div><b>GSTIN:</b> {data.business.gstin}</div>}
-            {data.business.state && <div>State: {data.business.state}</div>}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {data.business.logo_data && (
+              <img
+                src={data.business.logo_data}
+                alt={`${data.business.name} logo`}
+                style={{ maxWidth: 100, maxHeight: 64, objectFit: "contain" }}
+              />
+            )}
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: brandColor }}>{data.business.name}</div>
+              <div style={{ whiteSpace: "pre-line", color: mutedColor }}>{data.business.address}</div>
+              <div style={{ color: mutedColor }}>{[data.business.phone, data.business.email].filter(Boolean).join(" · ")}</div>
+              {data.business.gstin && <div><b>GSTIN:</b> {data.business.gstin}</div>}
+              {data.business.state && <div>State: {data.business.state}</div>}
+            </div>
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 22, fontWeight: 700, color: brandColor }}>TAX INVOICE</div>

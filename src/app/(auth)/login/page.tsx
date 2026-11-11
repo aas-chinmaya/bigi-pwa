@@ -41,7 +41,7 @@ export default function LoginPage() {
           <FileText className="h-6 w-6" />
         </div>
         <h1 className="text-2xl font-bold">Sign in</h1>
-        <p className="text-sm text-muted-foreground">InvoiceFlow</p>
+        <p className="text-sm text-muted-foreground">Biginex</p>
       </div>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">

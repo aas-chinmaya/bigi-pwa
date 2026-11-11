@@ -10,7 +10,7 @@ export default function Landing() {
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white">
             <FileText className="h-4 w-4" />
           </span>
-          InvoiceFlow
+          Biginex
         </div>
         <div className="flex gap-2">
           <Link className={buttonVariants({ variant: "ghost" })} href="/login">Sign in</Link>

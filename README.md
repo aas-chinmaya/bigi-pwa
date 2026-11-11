@@ -1,4 +1,4 @@
-# InvoiceFlow
+# Biginex
 
 Minimal GST invoicing — **4 main routes**, PDF, offline, installable PWA.
 

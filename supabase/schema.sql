@@ -1,4 +1,4 @@
--- InvoiceFlow — run once in NEW Supabase project SQL Editor
+-- Biginex — run once in NEW Supabase project SQL Editor
 create extension if not exists pgcrypto;
 
 create or replace function public.set_updated_at()
@@ -26,7 +26,7 @@ create table public.businesses (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references auth.users(id) on delete cascade,
   business_name text not null,
-  email text, phone text, address text, gstin text, state text,
+  email text, phone text, address text, gstin text, state text, logo_data text,
   invoice_prefix text not null default 'INV',
   default_notes text default 'Thank you for your business.',
   created_at timestamptz not null default now(),

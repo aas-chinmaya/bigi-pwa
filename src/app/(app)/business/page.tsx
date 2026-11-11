@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient, getCurrentUser } from "@/lib/supabase/client";
@@ -20,7 +20,35 @@ export default function BusinessPage() {
     gstin: "",
     state: "",
     invoice_prefix: "INV",
+    logo_data: "",
   });
+
+  function onLogoSelect(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    event.currentTarget.value = "";
+
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      toast.error("Choose a PNG, JPG, or WEBP logo");
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error("Logo must be 1 MB or smaller");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const logoData = reader.result;
+      if (typeof logoData !== "string") {
+        toast.error("Could not read the logo file");
+        return;
+      }
+      setForm((current) => ({ ...current, logo_data: logoData }));
+    };
+    reader.onerror = () => toast.error("Could not read the logo file");
+    reader.readAsDataURL(file);
+  }
 
   useEffect(() => {
     (async () => {
@@ -36,12 +64,13 @@ export default function BusinessPage() {
           gstin: b.gstin || "",
           state: b.state || "",
           invoice_prefix: b.invoice_prefix || "INV",
+          logo_data: b.logo_data || "",
         });
       }
     })();
   }, []);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!form.business_name.trim()) {
       toast.error("Business name required");
@@ -84,6 +113,33 @@ export default function BusinessPage() {
             <div className="space-y-1"><Label>State *</Label><Input required value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} placeholder="e.g. Maharashtra" /></div>
           </div>
           <div className="space-y-1"><Label>Invoice prefix</Label><Input value={form.invoice_prefix} onChange={(e) => setForm({ ...form, invoice_prefix: e.target.value })} /></div>
+          <div className="space-y-2">
+            <Label htmlFor="business-logo">Business logo</Label>
+            <Input
+              id="business-logo"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={onLogoSelect}
+            />
+            <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP, up to 1 MB. Shown on invoices and PDFs.</p>
+            {form.logo_data && (
+              <div className="flex items-center gap-3">
+                <img
+                  src={form.logo_data}
+                  alt="Business logo preview"
+                  className="max-h-16 max-w-36 rounded border bg-white object-contain p-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setForm((current) => ({ ...current, logo_data: "" }))}
+                >
+                  Remove logo
+                </Button>
+              </div>
+            )}
+          </div>
           <Button type="submit" className="w-full" size="lg" loading={loading}>Save & continue</Button>
         </form>
       </Card>

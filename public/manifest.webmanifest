@@ -1,6 +1,6 @@
 {
-  "name": "InvoiceFlow",
-  "short_name": "InvoiceFlow",
+  "name": "Biginex",
+  "short_name": "Biginex",
   "description": "GST invoices online and offline",
   "start_url": "/invoices",
   "scope": "/",

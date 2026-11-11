@@ -7,10 +7,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: { default: "InvoiceFlow", template: "%s · InvoiceFlow" },
+  title: { default: "Biginex", template: "%s · Biginex" },
   description: "Simple GST invoicing — online & offline PWA",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "InvoiceFlow" },
+  appleWebApp: { capable: true, title: "Biginex" },
 };
 export const viewport: Viewport = { themeColor: "#2563EB", width: "device-width", initialScale: 1 };
 

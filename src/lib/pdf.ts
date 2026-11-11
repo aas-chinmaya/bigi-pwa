@@ -9,6 +9,19 @@ export async function downloadInvoicePdf(el: HTMLElement, filename: string) {
     useCORS: true,
     backgroundColor: "#ffffff",
     logging: false,
+    onclone: (clonedDocument, clonedElement) => {
+      const normalizeColors = (element: HTMLElement) => {
+        const styles = clonedDocument.defaultView?.getComputedStyle(element);
+        if (styles?.borderColor.includes("oklch")) {
+          element.style.borderColor = "#d9e8e1";
+        }
+        if (styles?.outlineColor.includes("oklch")) {
+          element.style.outlineColor = "transparent";
+        }
+      };
+      normalizeColors(clonedElement);
+      clonedElement.querySelectorAll<HTMLElement>("*").forEach(normalizeColors);
+    },
   });
   const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
   const pageW = 210;

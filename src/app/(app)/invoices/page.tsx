@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FilePlus2, FileText } from "lucide-react";
+import { ArrowLeft, FilePlus2, FileText, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { createClient, getCurrentUser } from "@/lib/supabase/client";
 import { getDb, getCache, setCache } from "@/lib/offline/db";
 import { inr, fmtDate } from "@/lib/utils";
@@ -27,6 +28,8 @@ function offlineRow(rec: any, business: any) {
     invoice_date: payload.invoice_date,
     grand_total: calc.grandTotal,
     status: rec.syncStatus === "failed" ? "sync failed" : "pending sync",
+    syncStatus: rec.syncStatus,
+    localOnly: true,
   };
 }
 
@@ -34,6 +37,54 @@ export default function InvoicesPage() {
   const [rows, setRows] = useState<any[]>([]);
   const [pending, setPending] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  async function onDelete(invoice: any) {
+    const confirmation = invoice.localOnly
+      ? "Delete this offline invoice permanently?"
+      : "Delete this invoice permanently?";
+    if (!confirm(confirmation)) return;
+
+    try {
+      const user = await getCurrentUser();
+      if (!user) throw new Error("Sign in required");
+      let cachedInvoiceId = invoice.id;
+
+      if (invoice.localOnly) {
+        const queued = await getDb().offline.get(invoice.id);
+        if (!queued) throw new Error("This offline invoice no longer exists");
+        if (queued.syncStatus === "syncing") {
+          throw new Error("This invoice is syncing. Try deleting it again after sync completes.");
+        }
+        if (queued.syncStatus === "synced" && queued.serverId) {
+          if (!navigator.onLine) throw new Error("Reconnect to delete this invoice");
+          cachedInvoiceId = queued.serverId;
+          const { error } = await createClient()
+            .from("invoices")
+            .delete()
+            .eq("id", queued.serverId)
+            .eq("user_id", user.id);
+          if (error) throw error;
+        }
+        await getDb().offline.delete(invoice.id);
+      } else {
+        if (!navigator.onLine) throw new Error("Reconnect to delete this invoice");
+        const { error } = await createClient()
+          .from("invoices")
+          .delete()
+          .eq("id", invoice.id)
+          .eq("user_id", user.id);
+        if (error) throw error;
+      }
+
+      const cached = (await getCache(user.id, "invoices")) || [];
+      await setCache(user.id, "invoices", cached.filter((row: any) => row.id !== cachedInvoiceId));
+      setRows((current) => current.filter((row) => row.id !== invoice.id));
+      setPending((current) => current.filter((row) => row.localId !== invoice.id));
+      toast.success("Invoice deleted");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete invoice");
+    }
+  }
 
   useEffect(() => {
     const refreshAfterSync = async () => {
@@ -104,9 +155,18 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Invoices</h1>
-          <p className="text-sm text-muted-foreground">Create, view & download PDF</p>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/business"
+            aria-label="Back to business profile"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold">Invoices</h1>
+            <p className="text-sm text-muted-foreground">Create, view & download PDF</p>
+          </div>
         </div>
         <Link href="/invoices/new" className={buttonVariants()}><FilePlus2 className="h-4 w-4" /> New invoice</Link>
       </div>
@@ -139,6 +199,7 @@ export default function InvoicesPage() {
                   <th className="hidden px-3 py-3 font-medium sm:table-cell">Date</th>
                   <th className="px-3 py-3 font-medium text-right">Total</th>
                   <th className="px-3 py-3 font-medium">Status</th>
+                  <th className="px-3 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -154,6 +215,19 @@ export default function InvoicesPage() {
                     <td className="px-3 py-3 text-right tabular-nums font-medium">{inr(r.grand_total)}</td>
                     <td className="px-3 py-3">
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs capitalize">{r.status}</span>
+                    </td>
+                    <td className="px-3 py-2 text-right">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Delete invoice ${r.invoice_number || "draft"}`}
+                        title="Delete invoice"
+                        disabled={r.syncStatus === "syncing"}
+                        onClick={() => void onDelete(r)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
                     </td>
                   </tr>
                 ))}

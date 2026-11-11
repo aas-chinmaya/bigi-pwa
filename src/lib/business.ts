@@ -12,6 +12,7 @@ export type Business = {
   state?: string | null;
   invoice_prefix?: string;
   default_notes?: string | null;
+  logo_data?: string | null;
 };
 
 /** Load business online from Supabase or offline from Dexie. Never throws. */
@@ -51,6 +52,7 @@ export async function saveBusiness(userId: string, body: Partial<Business>) {
     state: body.state || null,
     invoice_prefix: body.invoice_prefix || "INV",
     default_notes: body.default_notes || "Thank you for your business.",
+    logo_data: body.logo_data || null,
   };
 
   if (typeof navigator !== "undefined" && !navigator.onLine) {
